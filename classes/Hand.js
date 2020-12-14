@@ -1,7 +1,7 @@
 import totalHandScore from '../totalHandScore';
 import Deck from './Deck';
 
-class Hand {
+export default class Hand {
     constructor() {
         this.hand = [];
     }

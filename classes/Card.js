@@ -1,4 +1,4 @@
-class Card {
+export default class Card {
     constructor(suit='S',rank='A') {
         this.suit = suit;
         this.rank = rank;

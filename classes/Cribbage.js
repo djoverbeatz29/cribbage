@@ -1,13 +1,14 @@
 import Deck from './Deck';
 import Hand from './Hand';
 
-class Cribbage {
+export default class Cribbage {
     constructor() {
         this.deck = new Deck();
         this.hands = {
             1: new Hand(),
             2: new Hand()
         }
+        this.cut = null;
     }
 
     dealCards() {
@@ -16,5 +17,6 @@ class Cribbage {
                 this.hands[j].addCard(this.deck.cards.shift());
             }
         }
+        this.cut = this.deck.cards.shift();
     }
 }

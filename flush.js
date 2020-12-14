@@ -1,6 +1,6 @@
 import counter from './counter';
 
-export default function dupes(hand) {
+export default function flush(hand) {
     hand = hand.map(card=>card.suit);
     hand = counter(hand);
     const max = Math.max(...hand);
