@@ -11,4 +11,8 @@ class Card {
         else return parseInt(rank);
     }
 
+    showCard() {
+        return `${this.rank}${this.suit}`;
+    }
+
 }
