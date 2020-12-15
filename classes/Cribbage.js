@@ -3,10 +3,11 @@ import Hand from './Hand';
 
 export default class Cribbage {
     constructor() {
+        const rando = !Math.round(Math.random());
         this.deck = new Deck();
         this.hands = {
-            1: new Hand(),
-            2: new Hand()
+            1: new Hand(rando),
+            2: new Hand(!rando)
         }
         this.cut = null;
     }

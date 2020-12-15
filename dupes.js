@@ -1,7 +1,7 @@
 import counter from './counter';
 
 export default function dupes(hand) {
-    hand = hand.map(card=>card.score());
+    hand = hand.map(card=>card.score);
     let points = 0;
     const counts = counter(hand);
     Object.values(counts).forEach(count=>{

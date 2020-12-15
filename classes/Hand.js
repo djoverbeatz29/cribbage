@@ -2,8 +2,9 @@ import totalHandScore from '../totalHandScore';
 import Deck from './Deck';
 
 export default class Hand {
-    constructor() {
+    constructor(isDealer=true) {
         this.hand = [];
+        this.isDealer = isDealer
     }
 
     score(cards=this.hand) {
@@ -14,30 +15,38 @@ export default class Hand {
         this.hand.push(card);
     }
 
-    expectedValue(handIndices, cribIndices, dealer=true) {
+    expectedValue(handIndices) {
+        const n = this.hand.length;
+        const cribIndices = [...Array(n).keys()].filter(i=>!handIndices.find(ix=>ix===i));
         const handCards = handIndices.map(ix=>this.hand[ix]);
         const cribCards = cribIndices.map(ix=>this.hand[ix]);
         const sampCards = (new Deck()).cards;
         const others = sampCards.filter(card=>!handCards.find(handCard=>card.rank===handCard.rank && card.suit===handCard.suit));
         const scores = [];
         for (let i=0;i<others.length;i++) {
-            const otherCard = others[i];
+            const othersCopy = JSON.parse(JSON.stringify(others));
+            const otherCard = othersCopy[i];
             const handScore = this.score(handCards.concat(otherCard));
-            const otherIndices = [...Array(others.length).keys()];
-            otherIndices.splice(i,1);
-            cribScores = [];
-            for (let n=0;n<100;n++) {
-                const randos = [];
+            const cribScores = [];
+            for (let r=0; r<50; r++) {
+                const randoCards = [];
                 for (let j=0; j<1; j++) {
-                    randos.concat(otherIndices.splice(Math.floor(Math.random()*otherIndices.length),1));
+                    randoCards.concat(othersCopy.splice(Math.floor(Math.random()*othersCopy.length),1));
                 }
-                randoCards = randos.map(ix=>others[ix]);
                 cribScores.push(this.score(cribCards.concat(randoCards).concat(otherCard)));
             }
             const cribEV = cribScores.reduce((card,sum)=>card+sum, 0) / cribScores.length;
-            scores.push(handScore + cribScores * (dealer ? 1 : -1));
+            scores.push({
+                "handScore": handScore,
+                "cribScore": cribEV * (this.isDealer ? 1 : -1)
+            });
         }
-        return scores.reduce((card,sum)=>card+sum, 0) / scores.length;
+        const hands = scores.map(ob=>ob.handScore);
+        const cribs = scores.map(ob=>ob.cribScore);
+        return {
+            "handEV": hands.reduce((card,sum)=>card+sum, 0) / scores.length,
+            "cribEV": cribs.reduce((card,sum)=>card+sum, 0) / cribs.length
+        };
     }
 
     allHandExpectedValues() {
@@ -46,13 +55,15 @@ export default class Hand {
         for (let i=0;i<n;i++) {
             for (let j=i+1; j<n;j++) {
                 const myIndices = [...Array(n).keys()].filter(ix=>ix!==i && ix!==j);
+                const cribIndices = [i,j];
                 const handEV = this.expectedValue(myIndices);
                 const handString = myIndices.map(ix=>this.hand[ix].showCard()).join('-');
                 samples.push([handString, handEV]);
-                console.log(`${handString}: ${handEV}`);
+                console.log(`${handString}: ${handEV.handEV + handEV.cribEV}`);
             }
         }
-        return samples.reduce((max,item)=>item[1]>max[1]?item:max,[0,0]);
+        // return samples.reduce((max,item)=>item[1]>max[1]?item:max,[0,0]);
+        return samples;
     }
 
 }
