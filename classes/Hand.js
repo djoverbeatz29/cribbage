@@ -29,9 +29,9 @@ export default class Hand {
             const handScore = this.score(handCards.concat(otherCard));
             const cribScores = [];
             for (let r=0; r<50; r++) {
-                const randoCards = [];
+                let randoCards = [];
                 for (let j=0; j<1; j++) {
-                    randoCards.concat(othersCopy.splice(Math.floor(Math.random()*othersCopy.length),1));
+                    randoCards = randoCards.concat(othersCopy.splice(Math.floor(Math.random()*othersCopy.length),1));
                 }
                 cribScores.push(this.score(cribCards.concat(randoCards).concat(otherCard)));
             }
@@ -43,9 +43,12 @@ export default class Hand {
         }
         const hands = scores.map(ob=>ob.handScore);
         const cribs = scores.map(ob=>ob.cribScore);
+        const aveHand = hands.reduce((card,sum)=>card+sum, 0) / scores.length;
+        const aveCrib = cribs.reduce((card,sum)=>card+sum, 0) / cribs.length;
         return {
-            "handEV": hands.reduce((card,sum)=>card+sum, 0) / scores.length,
-            "cribEV": cribs.reduce((card,sum)=>card+sum, 0) / cribs.length
+            "handEV": aveHand,
+            "cribEV": aveCrib,
+            "total": aveHand+aveCrib
         };
     }
 
@@ -56,14 +59,18 @@ export default class Hand {
             for (let j=i+1; j<n;j++) {
                 const myIndices = [...Array(n).keys()].filter(ix=>ix!==i && ix!==j);
                 const cribIndices = [i,j];
-                const handEV = this.expectedValue(myIndices);
+                const handOb = this.expectedValue(myIndices);
                 const handString = myIndices.map(ix=>this.hand[ix].showCard()).join('-');
-                samples.push([handString, handEV]);
-                console.log(`${handString}: ${handEV.handEV + handEV.cribEV}`);
+                const cribString = cribIndices.map(ix=>this.hand[ix].showCard()).join('-');
+                handOb['hand']=handString;
+                handOb['crib']=cribString;
+                samples.push(handOb);
+                console.log(`Hand=${handString}, Crib=${cribString}`);
+                console.log(`Hand=${handOb.handEV.toFixed(2)}, Crib=${handOb.cribEV.toFixed(2)}`);
+                console.log(`Total=${handOb.total.toFixed(2)}`)
             }
         }
-        // return samples.reduce((max,item)=>item[1]>max[1]?item:max,[0,0]);
-        return samples;
+        return samples.reduce((max,item)=>item.total>max.total?item:max,{"total": -29});
     }
 
 }
