@@ -14,11 +14,29 @@ export default class Hand {
         this.hand.push(card);
     }
 
-    expectedValue(indices) {
-        const handCards = indices.map(ix=>this.hand[ix]);
+    expectedValue(handIndices, cribIndices, dealer=true) {
+        const handCards = handIndices.map(ix=>this.hand[ix]);
+        const cribCards = cribIndices.map(ix=>this.hand[ix]);
         const sampCards = (new Deck()).cards;
         const others = sampCards.filter(card=>!handCards.find(handCard=>card.rank===handCard.rank && card.suit===handCard.suit));
-        const scores = others.map(otherCard=>this.score(handCards.concat(otherCard)));
+        const scores = [];
+        for (let i=0;i<others.length;i++) {
+            const otherCard = others[i];
+            const handScore = this.score(handCards.concat(otherCard));
+            const otherIndices = [...Array(others.length).keys()];
+            otherIndices.splice(i,1);
+            cribScores = [];
+            for (let n=0;n<100;n++) {
+                const randos = [];
+                for (let j=0; j<1; j++) {
+                    randos.concat(otherIndices.splice(Math.floor(Math.random()*otherIndices.length),1));
+                }
+                randoCards = randos.map(ix=>others[ix]);
+                cribScores.push(this.score(cribCards.concat(randoCards).concat(otherCard)));
+            }
+            const cribEV = cribScores.reduce((card,sum)=>card+sum, 0) / cribScores.length;
+            scores.push(handScore + cribScores * (dealer ? 1 : -1));
+        }
         return scores.reduce((card,sum)=>card+sum, 0) / scores.length;
     }
 
