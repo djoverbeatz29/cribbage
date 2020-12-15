@@ -24,16 +24,17 @@ export default class Hand {
 
     allHandExpectedValues() {
         const samples = [];
-        for (let i=0;i<this.hand.length;i++) {
-            for (let j=i+1; j<this.hand.length;j++) {
-                const myIndices = [...Array(this.hand.length).keys].filter(ix=>ix!==i && ix!==j);
+        const n = this.hand.length;
+        for (let i=0;i<n;i++) {
+            for (let j=i+1; j<n;j++) {
+                const myIndices = [...Array(n).keys()].filter(ix=>ix!==i && ix!==j);
                 const handEV = this.expectedValue(myIndices);
                 const handString = myIndices.map(ix=>this.hand[ix].showCard()).join('-');
                 samples.push([handString, handEV]);
                 console.log(`${handString}: ${handEV}`);
             }
         }
-        return samples;
+        return samples.reduce((max,item)=>item[1]>max[1]?item:max,[0,0]);
     }
 
 }

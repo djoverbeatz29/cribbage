@@ -1,6 +1,7 @@
 export default function streak(hand) {
     let len = 1;
     let streaks=[];
+    hand = hand.map(card=>card.score());
     for (let i=1;i<hand.length;i++) {
         if (hand[i]===hand[i-1]+1) {
             len += 1;
